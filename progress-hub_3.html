@@ -355,15 +355,15 @@ function migrateSkills(){
 
 async function load(){
   try{
-    const res = await window.storage.get('hub-state', false);
-    if(res) state = Object.assign(state, JSON.parse(res.value));
-  }catch(e){ /* first run */ }
+    const raw = localStorage.getItem('hub-state');
+    if(raw) state = Object.assign(state, JSON.parse(raw));
+  }catch(e){ console.error('load failed', e); }
   migrateSkills();
   applyTheme(state.theme||'adventure');
   renderAll();
 }
 async function save(){
-  try{ await window.storage.set('hub-state', JSON.stringify(state), false); }
+  try{ localStorage.setItem('hub-state', JSON.stringify(state)); }
   catch(e){ console.error('save failed', e); }
 }
 
@@ -526,12 +526,12 @@ const SEED_WEEKS = {
     {label:'Week 1', items:[
       {txt:'Semantic HTML, forms & validation, accessibility', res:'https://developer.mozilla.org/en-US/docs/Web/HTML', project:'Build a contact form with full native HTML validation, then run it through an accessibility checker'},
       {txt:'HTML tables & lists (resume layout practice)', res:'https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table', project:'Build a single-page HTML resume with no CSS'},
-      {txt:'Follow along: CodeWithHarry Sigma — HTML section', res:'https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w', project:''}
+      {txt:'Follow along: CodeWithHarry Sigma Web Dev (140-video playlist) — HTML part', res:'https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w', project:''}
     ]},
     {label:'Week 2', items:[
       {txt:'CSS box model, flexbox, grid', res:'https://www.youtube.com/@KevinPowell', project:'Rebuild your resume layout with flexbox/grid, make it look like a real one-pager'},
       {txt:'CSS positioning & z-index', res:'https://developer.mozilla.org/en-US/docs/Web/CSS/position', project:'Build a sticky navbar + image card with hover overlay'},
-      {txt:'Follow along: CodeWithHarry Sigma — CSS section', res:'https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w', project:''}
+      {txt:'Follow along: CodeWithHarry Sigma Web Dev (140-video playlist) — CSS part', res:'https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w', project:''}
     ]},
     {label:'Week 3', items:[
       {txt:'Sass/SCSS + responsive design', res:'https://sass-lang.com/guide/', project:'Convert your CSS into SCSS with variables for color/spacing'},
@@ -540,7 +540,7 @@ const SEED_WEEKS = {
     {label:'Week 4', items:[
       {txt:'JS fundamentals, DOM, ES6+', res:'https://www.youtube.com/watch?v=PkZNo7MFNFg', project:'Build a simple calculator using JS + DOM manipulation'},
       {txt:'Events & form handling in JS', res:'https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model', project:'Make your contact form submit and show a custom success message via JS'},
-      {txt:'Follow along: CodeWithHarry Sigma — JS section', res:'https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w', project:''}
+      {txt:'Follow along: CodeWithHarry Sigma Web Dev (140-video playlist) — JS part', res:'https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w', project:''}
     ]},
     {label:'Week 5', items:[
       {txt:'JS array methods + async/await + APIs', res:'https://www.geeksforgeeks.org/javascript/javascript-array-methods/', project:'Build a small to-do list app using only map/filter/reduce'},
@@ -549,15 +549,15 @@ const SEED_WEEKS = {
     {label:'Week 6', items:[
       {txt:'Git & GitHub, npm, intro React', res:'https://react.dev/learn', project:'Push everything you\'ve built so far into one clean GitHub repo with a README'},
       {txt:'React components, props, state', res:'https://react.dev/learn/your-first-component', project:'Convert your to-do list into a React component'},
-      {txt:'Follow along: CodeWithHarry Sigma — Git/React section', res:'https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w', project:''}
+      {txt:'Follow along: CodeWithHarry Sigma Web Dev (140-video playlist) — Git/React part', res:'https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w', project:''}
     ]},
     {label:'Week 7', items:[
       {txt:'Build & deploy a portfolio site', res:'https://www.theodinproject.com/', project:'Build a personal portfolio site (HTML/CSS/JS or React) showcasing your weather app + to-do list'},
       {txt:'Deploying free (Netlify/Vercel/GitHub Pages)', res:'https://vercel.com/docs', project:'Deploy your portfolio and add the live link to your GitHub README'}
     ]},
     {label:'Week 8', items:[
-      {txt:'Backend basics: Node.js & Express', res:'https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w', project:'Build a simple REST API with Express'},
-      {txt:'MongoDB basics', res:'https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w', project:'Connect your Express API to MongoDB and store real data'},
+      {txt:'Follow along: CodeWithHarry Sigma Web Dev (140-video playlist) — Node/Express part', res:'https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w', project:'Build a simple REST API with Express'},
+      {txt:'Follow along: CodeWithHarry Sigma Web Dev (140-video playlist) — MongoDB part', res:'https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w', project:'Connect your Express API to MongoDB and store real data'},
       {txt:'Put it together: a small full-stack (MERN-ish) app', res:'', project:'Combine your frontend (React) with the backend API you just built'}
     ]}
   ],
@@ -597,12 +597,12 @@ const CURATED_RESOURCES = {
     {name:'CodeHelp C++ DSA Playlist', url:'https://www.youtube.com/playlist?list=PLDzeHZWIZsTryvtXdMr6rPh4IDexB5NIA'}
   ],
   'Web Dev': [
+    {name:'⭐ CodeWithHarry — Sigma Web Dev (140 videos, full stack, Hindi)', url:'https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w'},
     {name:'MDN Web Docs', url:'https://developer.mozilla.org/'},
     {name:'GFG — JS Array Methods', url:'https://www.geeksforgeeks.org/javascript/javascript-array-methods/'},
     {name:'W3Schools', url:'https://www.w3schools.com/'},
     {name:'The Odin Project', url:'https://www.theodinproject.com/'},
     {name:'Kevin Powell (CSS)', url:'https://www.youtube.com/@KevinPowell'},
-    {name:'CodeWithHarry — Sigma Web Dev (full stack, Hindi)', url:'https://www.youtube.com/playlist?list=PLu0W_9lII9agq5TrH9XLIKQvv0iaF2X3w'},
     {name:'Apna College — Web Dev playlist (alt/faster-paced, Hindi)', url:'https://www.youtube.com/@ApnaCollegeOfficial/playlists'}
   ],
   'ML': [
