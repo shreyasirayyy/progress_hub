@@ -10,15 +10,27 @@
   }
   /* ===== ADVENTURE THEME (default) ===== */
   body.theme-adventure{
-    --bg:#16201b; --bg2:#1f2c24; --panel:#223028; --panel2:#2a3a30;
-    --line:#3a4d40; --text:#eef0e6; --dim:#9fae9f;
-    --accent:#e8a84c; --accent2:#5fa88a; --danger:#d9755a;
-    --font-display: Georgia, 'Times New Roman', serif;
+    --bg:#10211c; --bg2:#16332a; --panel:#1b3b30; --panel2:#234a3c;
+    --line:#2f5d4b; --text:#f3ede0; --dim:#9bbfae;
+    --accent:#f0a84c; --accent2:#5fd0a0; --danger:#e8765a;
+    --font-display: 'Georgia', 'Palatino Linotype', serif;
     --font-body: 'Trebuchet MS', Helvetica, Arial, sans-serif;
     background:
-      radial-gradient(circle at 15% 10%, rgba(95,168,138,0.08), transparent 40%),
-      radial-gradient(circle at 85% 90%, rgba(232,168,76,0.06), transparent 45%),
-      var(--bg);
+      radial-gradient(circle at 12% 8%, rgba(95,208,160,0.14), transparent 42%),
+      radial-gradient(circle at 88% 92%, rgba(240,168,76,0.12), transparent 48%),
+      radial-gradient(circle at 50% 50%, rgba(95,208,160,0.05), transparent 60%),
+      linear-gradient(160deg, #0d1c17 0%, #16332a 55%, #10211c 100%);
+    background-attachment: fixed;
+  }
+  body.theme-adventure nav.sidebar{
+    background: linear-gradient(180deg, #1b3b30, #14281f);
+    box-shadow: 2px 0 24px rgba(0,0,0,0.25);
+  }
+  body.theme-adventure .card{
+    box-shadow: 0 4px 18px rgba(0,0,0,0.22);
+  }
+  body.theme-adventure .navbtn.active{
+    box-shadow: inset 3px 0 0 var(--accent);
   }
   /* ===== CUTE THEME ===== */
   body.theme-cute{
@@ -34,6 +46,7 @@
   }
 
   *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
   html,body{margin:0;min-height:100vh;font-family:var(--font-body);color:var(--text);transition:background 0.4s;}
   h1,h2,h3{font-family:var(--font-display);margin:0;}
 
@@ -103,7 +116,8 @@
   .ringlabel small{font-size:13px;color:var(--dim);display:block;font-weight:normal;}
 
   .skillgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:14px;}
-  .skillcard{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;}
+  .skillcard{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;transition:transform 0.15s, border-color 0.15s;}
+  .skillcard:hover{transform:translateY(-2px);border-color:var(--accent);}
   .skillcard .name{font-size:13px;font-weight:bold;margin-bottom:6px;}
   .bar-outer{height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;}
   .bar-inner{height:100%;background:var(--accent);border-radius:4px;transition:width 0.4s;}
@@ -113,6 +127,15 @@
 
   /* skills page tabs */
   .subtabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  #weekTabs{
+    position:sticky; top:0; z-index:10;
+    background:var(--bg); padding:10px 0 12px;
+    margin-bottom:6px; border-bottom:1px solid var(--line);
+  }
+  .weeknav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:10px;border-top:1px dashed var(--line);}
+  .weeknav button{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 16px;border-radius:8px;cursor:pointer;font-family:var(--font-body);font-size:13px;}
+  .weeknav button:hover{border-color:var(--accent);color:var(--accent);}
+  .weeknav button:disabled{opacity:0.35;cursor:default;}
   .subtab{padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:13px;}
   .subtab.active{background:var(--accent);color:#1a1a1a;border-color:var(--accent);font-weight:bold;}
 
@@ -218,6 +241,10 @@
           <button class="btn" id="addSkillItem">+ add</button>
         </div>
         <div id="skillItems"></div>
+        <div class="weeknav">
+          <button id="prevWeekBtn">← previous week</button>
+          <button id="nextWeekBtn">next week →</button>
+        </div>
       </div>
     </section>
 
@@ -647,7 +674,17 @@ function renderOverview(){
     const pct = items.length ? Math.round(done/items.length*100) : 0;
     const div = document.createElement('div');
     div.className='skillcard';
-    div.innerHTML = `<div class="name">${SKILL_LABELS[k]}</div><div class="bar-outer"><div class="bar-inner" style="width:${pct}%"></div></div><div class="pct">${done}/${items.length} done</div>`;
+    div.style.cursor='pointer';
+    div.title = 'View ' + SKILL_LABELS[k];
+    div.innerHTML = `<div class="name">${SKILL_LABELS[k]} →</div><div class="bar-outer"><div class="bar-inner" style="width:${pct}%"></div></div><div class="pct">${done}/${items.length} done</div>`;
+    div.onclick = () => {
+      activeSkill = k;
+      document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
+      document.querySelector('.navbtn[data-page="skills"]').classList.add('active');
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.getElementById('page-skills').classList.add('active');
+      renderSkillTabs(); renderWeekTabs(); renderSkillItems();
+    };
     grid.appendChild(div);
   });
   const overallPct = totalAll ? Math.round(totalDone/totalAll*100) : 0;
@@ -718,7 +755,21 @@ function renderSkillItems(){
   });
   wrap.querySelectorAll('.skToggle').forEach(cb=>cb.onchange=()=>{ week.items[cb.dataset.idx].done=cb.checked; save(); renderSkillItems(); renderWeekTabs(); renderOverview(); });
   wrap.querySelectorAll('.skDel').forEach(b=>b.onclick=()=>{ week.items.splice(b.dataset.idx,1); save(); renderSkillItems(); renderWeekTabs(); renderOverview(); });
+
+  const prevBtn = document.getElementById('prevWeekBtn');
+  const nextBtn = document.getElementById('nextWeekBtn');
+  if(prevBtn && nextBtn){
+    prevBtn.disabled = activeWeek[activeSkill] <= 0;
+    nextBtn.disabled = activeWeek[activeSkill] >= weeks.length - 1;
+  }
 }
+document.getElementById('prevWeekBtn').onclick = () => {
+  if(activeWeek[activeSkill] > 0){ activeWeek[activeSkill]--; renderWeekTabs(); renderSkillItems(); }
+};
+document.getElementById('nextWeekBtn').onclick = () => {
+  const weeks = state.skills[activeSkill];
+  if(activeWeek[activeSkill] < weeks.length - 1){ activeWeek[activeSkill]++; renderWeekTabs(); renderSkillItems(); }
+};
 document.getElementById('addSkillItem').onclick = () => {
   const txt = document.getElementById('skillTxt');
   const res = document.getElementById('skillRes');
