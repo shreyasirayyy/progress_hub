@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shreyasi's Progress Hub</title>
+<style>
+  :root{
+    --r: 16px;
+  }
+  /* ===== ADVENTURE THEME (default) ===== */
+  body.theme-adventure{
+    --bg:#16201b; --bg2:#1f2c24; --panel:#223028; --panel2:#2a3a30;
+    --line:#3a4d40; --text:#eef0e6; --dim:#9fae9f;
+    --accent:#e8a84c; --accent2:#5fa88a; --danger:#d9755a;
+    --font-display: Georgia, 'Times New Roman', serif;
+    --font-body: 'Trebuchet MS', Helvetica, Arial, sans-serif;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(95,168,138,0.08), transparent 40%),
+      radial-gradient(circle at 85% 90%, rgba(232,168,76,0.06), transparent 45%),
+      var(--bg);
+  }
+  /* ===== CUTE THEME ===== */
+  body.theme-cute{
+    --bg:#fdf3f6; --bg2:#fbe9f0; --panel:#fffafc; --panel2:#fdeef5;
+    --line:#f3d6e3; --text:#5b3a4a; --dim:#a9818f;
+    --accent:#ef9bbf; --accent2:#a78bdb; --danger:#e88a8a;
+    --font-display: 'Brush Script MT', 'Segoe Script', cursive;
+    --font-body: 'Segoe UI', Tahoma, sans-serif;
+    background:
+      radial-gradient(circle at 10% 15%, rgba(239,155,191,0.10), transparent 40%),
+      radial-gradient(circle at 90% 85%, rgba(167,139,219,0.10), transparent 45%),
+      var(--bg);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;min-height:100vh;font-family:var(--font-body);color:var(--text);transition:background 0.4s;}
+  h1,h2,h3{font-family:var(--font-display);margin:0;}
+
+  /* ---------- SPLASH ---------- */
+  #splash{
+    position:fixed;inset:0;z-index:999;
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;
+    background:linear-gradient(135deg, var(--bg2), var(--bg));
+    animation:fadeOutSplash 0.6s ease forwards;
+    animation-delay:2.6s;
+  }
+  @keyframes fadeOutSplash{ to{ opacity:0; visibility:hidden; pointer-events:none; } }
+  #splash h1{font-size:42px;color:var(--accent);opacity:0;animation:popIn 0.8s ease forwards;animation-delay:0.2s;text-align:center;}
+  #splash p{font-size:16px;color:var(--dim);opacity:0;animation:popIn 0.8s ease forwards;animation-delay:0.9s;text-align:center;}
+  #splash .ring{width:54px;height:54px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);opacity:0;animation:popIn 0.6s ease forwards, spin 1.2s linear infinite;animation-delay:1.5s;}
+  @keyframes popIn{ from{opacity:0;transform:translateY(14px) scale(0.95);} to{opacity:1;transform:translateY(0) scale(1);} }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* ---------- LAYOUT ---------- */
+  .app{display:flex;min-height:100vh;}
+  nav.sidebar{
+    width:210px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--line);
+    padding:20px 14px;display:flex;flex-direction:column;gap:4px;
+  }
+  .brand{font-family:var(--font-display);font-size:22px;color:var(--accent);margin-bottom:18px;line-height:1.2;}
+  .brand small{display:block;font-family:var(--font-body);font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;}
+  .navbtn{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;
+    color:var(--dim);font-size:14px;border:1px solid transparent;transition:all 0.15s;
+  }
+  .navbtn:hover{background:var(--panel2);color:var(--text);}
+  .navbtn.active{background:var(--panel2);color:var(--accent);border-color:var(--line);font-weight:bold;}
+  .theme-toggle{margin-top:auto;display:flex;gap:6px;padding-top:14px;border-top:1px solid var(--line);}
+  .theme-toggle button{flex:1;padding:8px 6px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--dim);font-size:11px;cursor:pointer;}
+  .theme-toggle button.active{border-color:var(--accent);color:var(--accent);}
+
+  main{flex:1;padding:28px 32px 60px;max-width:980px;}
+  .page{display:none;}
+  .page.active{display:block;animation:fadeIn 0.35s ease;}
+  @keyframes fadeIn{ from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
+
+  .pageTitle{font-size:26px;margin-bottom:4px;}
+  .pageSub{color:var(--dim);font-size:13px;margin-bottom:22px;}
+
+  /* ---------- CARDS / SHARED ---------- */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:16px;}
+  .row{display:flex;gap:8px;flex-wrap:wrap;}
+  input[type=text],input[type=date],input[type=number],select,textarea{
+    background:var(--bg2);border:1px solid var(--line);color:var(--text);padding:8px 10px;border-radius:8px;
+    font-family:var(--font-body);font-size:13px;
+  }
+  button.btn{
+    background:var(--accent);color:#1a1a1a;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;
+    font-family:var(--font-body);font-size:13px;font-weight:bold;transition:transform 0.1s;
+  }
+  button.btn:hover{transform:translateY(-1px);}
+  button.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text);font-weight:normal;}
+  button.iconbtn{background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;}
+  button.iconbtn:hover{color:var(--danger);}
+  a{color:var(--accent2);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  /* progress ring */
+  .ringwrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
+  svg.progressring{transform:rotate(-90deg);}
+  .ringlabel{font-size:32px;font-weight:bold;color:var(--accent);}
+  .ringlabel small{font-size:13px;color:var(--dim);display:block;font-weight:normal;}
+
+  .skillgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:14px;}
+  .skillcard{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;}
+  .skillcard .name{font-size:13px;font-weight:bold;margin-bottom:6px;}
+  .bar-outer{height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;}
+  .bar-inner{height:100%;background:var(--accent);border-radius:4px;transition:width 0.4s;}
+  .skillcard .pct{font-size:11px;color:var(--dim);margin-top:4px;}
+
+  .quote{font-family:var(--font-display);font-style:italic;font-size:15px;color:var(--accent2);margin-top:18px;}
+
+  /* skills page tabs */
+  .subtabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .subtab{padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:13px;}
+  .subtab.active{background:var(--accent);color:#1a1a1a;border-color:var(--accent);font-weight:bold;}
+
+  .item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);}
+  .item:last-child{border-bottom:none;}
+  .item.done{opacity:0.5;}
+  .item input[type=checkbox]{width:17px;height:17px;margin-top:3px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;}
+  .item .body{flex:1;min-width:0;}
+  .item .txt{font-size:13.5px;}
+  .item.done .txt{text-decoration:line-through;}
+  .item .meta{font-size:11.5px;color:var(--dim);margin-top:3px;}
+  .item .meta a{margin-right:12px;}
+  .item .proj{font-size:11.5px;color:var(--accent);margin-top:3px;}
+  .empty{color:var(--dim);font-size:12.5px;font-style:italic;padding:10px 0;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);}
+  th{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:0.5px;}
+
+  .projcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:14px;}
+  .projcard{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;}
+  .projcard h3{font-size:15px;color:var(--accent);margin-bottom:6px;}
+  .projcard p{font-size:12.5px;color:var(--dim);margin:0 0 8px;}
+  .tag{display:inline-block;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:2px 8px;font-size:10.5px;color:var(--dim);margin-right:4px;margin-bottom:4px;}
+
+  .dateitem{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .dateitem:last-child{border-bottom:none;}
+  .datepill{font-size:11px;background:var(--bg2);border-radius:10px;padding:3px 9px;color:var(--accent2);}
+
+  .reslist{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
+  .resgroup h3{font-size:13px;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent2);margin-bottom:8px;}
+  .resgroup ul{list-style:none;padding:0;margin:0;}
+  .resgroup li{font-size:13px;padding:5px 0;border-bottom:1px dashed var(--line);}
+
+  .attbig{display:flex;gap:14px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+  .attbig .num{font-size:34px;font-weight:bold;color:var(--accent);}
+</style>
+</head>
+<body class="theme-adventure">
+
+<div id="splash">
+  <div class="ring"></div>
+  <h1>Hii Shreyasi 👋</h1>
+  <p>Let's track your progress.</p>
+</div>
+
+<div class="app">
+  <nav class="sidebar">
+    <div class="brand">Progress Hub<small>shreyasi's quest log</small></div>
+    <div class="navbtn active" data-page="overview">🏠 Overview</div>
+    <div class="navbtn" data-page="skills">🛠️ Skills</div>
+    <div class="navbtn" data-page="revision">🔁 Revision</div>
+    <div class="navbtn" data-page="assignments">🎓 Assignments & Sem Goals</div>
+    <div class="navbtn" data-page="resources">📚 Resources</div>
+    <div class="navbtn" data-page="attendance">🗓️ Attendance</div>
+    <div class="navbtn" data-page="projects">🚀 Projects</div>
+    <div class="navbtn" data-page="dates">📌 Important Dates</div>
+    <div class="theme-toggle">
+      <button id="themeAdventure" class="active">🧭 Adventure</button>
+      <button id="themeCute">🌸 Cute</button>
+    </div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px;font-size:12px;">
+      <a href="https://codeforces.com/profile/shreyy_rayy" target="_blank" rel="noopener">🟦 Codeforces</a>
+      <a href="https://leetcode.com/u/your-username/" target="_blank" rel="noopener" id="leetcodeLink">🟧 LeetCode</a>
+      <a href="https://github.com/shreyasirayyy" target="_blank" rel="noopener">⬛ GitHub</a>
+    </div>
+  </nav>
+
+  <main>
+    <!-- OVERVIEW -->
+    <section class="page active" id="page-overview">
+      <div class="pageTitle">Welcome back 👋</div>
+      <div class="pageSub" id="todayDate"></div>
+      <div class="card">
+        <div class="ringwrap">
+          <svg class="progressring" width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" stroke-width="12"/>
+            <circle id="ringFg" cx="60" cy="60" r="52" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+          </svg>
+          <div>
+            <div class="ringlabel" id="overallPct">0%<small>overall progress across all skills</small></div>
+          </div>
+        </div>
+        <div class="skillgrid" id="overviewSkillGrid"></div>
+        <div class="quote" id="overviewQuote"></div>
+      </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section class="page" id="page-skills">
+      <div class="pageTitle">Skills</div>
+      <div class="pageSub">UI/UX · DSA · Web Dev · ML — tick things off as you go.</div>
+      <div class="subtabs" id="skillTabs"></div>
+      <div class="row" style="margin-bottom:14px;">
+        <button class="btn ghost" id="loadPlanBtn">+ load saved plan for this skill</button>
+      </div>
+      <div class="subtabs" id="weekTabs"></div>
+      <div class="card">
+        <div class="row" style="margin-bottom:10px;">
+          <input type="text" id="skillTxt" placeholder="Topic / task" style="flex:1.4">
+          <input type="text" id="skillRes" placeholder="One resource link (optional)" style="flex:1.4">
+          <input type="text" id="skillProj" placeholder="Project to build (optional)" style="flex:1.2">
+          <button class="btn" id="addSkillItem">+ add</button>
+        </div>
+        <div id="skillItems"></div>
+      </div>
+    </section>
+
+    <!-- REVISION -->
+    <section class="page" id="page-revision">
+      <div class="pageTitle">Revision</div>
+      <div class="pageSub">Topics you want to keep fresh — mark when you last revised.</div>
+      <div class="card">
+        <div class="row" style="margin-bottom:10px;">
+          <input type="text" id="revTopic" placeholder="Topic to revise" style="flex:1.5">
+          <button class="btn" id="addRev">+ add</button>
+        </div>
+        <table id="revTable"><thead><tr><th>Topic</th><th>Last revised</th><th></th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <!-- ASSIGNMENTS -->
+    <section class="page" id="page-assignments">
+      <div class="pageTitle">Assignments & Sem Goals</div>
+      <div class="pageSub">College submissions and semester syllabus targets.</div>
+      <div class="card">
+        <div class="row" style="margin-bottom:10px;">
+          <input type="text" id="asgTitle" placeholder="Assignment / goal" style="flex:1.4">
+          <input type="text" id="asgSubject" placeholder="Subject" style="flex:1">
+          <input type="date" id="asgDate">
+          <button class="btn" id="addAsg">+ add</button>
+        </div>
+        <div id="asgList"></div>
+      </div>
+    </section>
+
+    <!-- RESOURCES -->
+    <section class="page" id="page-resources">
+      <div class="pageTitle">Resources</div>
+      <div class="pageSub">The short list — curated, not a YouTube search dump.</div>
+      <div class="card reslist" id="curatedResources"></div>
+      <div class="card">
+        <h3 style="font-size:13px;color:var(--accent2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Add your own</h3>
+        <div class="row">
+          <input type="text" id="resName" placeholder="Name" style="flex:1">
+          <input type="text" id="resUrl" placeholder="Link" style="flex:1.5">
+          <button class="btn" id="addRes">+ add</button>
+        </div>
+        <div id="customResList" style="margin-top:10px;"></div>
+      </div>
+    </section>
+
+    <!-- ATTENDANCE -->
+    <section class="page" id="page-attendance">
+      <div class="pageTitle">Attendance</div>
+      <div class="pageSub">Quick daily log.</div>
+      <div class="card">
+        <div class="attbig">
+          <div><div class="num" id="attPct">—</div><div style="font-size:11px;color:var(--dim);">attendance</div></div>
+          <button class="btn" id="markPresent">✓ Present today</button>
+          <button class="btn ghost" id="markAbsent">✕ Absent today</button>
+        </div>
+        <table><thead><tr><th>Date</th><th>Status</th><th></th></tr></thead><tbody id="attLog"></tbody></table>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="page" id="page-projects">
+      <div class="pageTitle">Projects</div>
+      <div class="pageSub">Everything you've built so far.</div>
+      <div class="card">
+        <div class="row" style="margin-bottom:10px;">
+          <input type="text" id="projTitle" placeholder="Project title" style="flex:1.2">
+          <input type="text" id="projLink" placeholder="Link (GitHub/live, optional)" style="flex:1.2">
+          <input type="text" id="projTags" placeholder="Tags (comma separated)" style="flex:1">
+        </div>
+        <textarea id="projDesc" placeholder="Brief description" style="width:100%;min-height:50px;margin-bottom:8px;"></textarea>
+        <button class="btn" id="addProj">+ add project</button>
+        <div class="projcards" id="projCards"></div>
+      </div>
+    </section>
+
+    <!-- DATES -->
+    <section class="page" id="page-dates">
+      <div class="pageTitle">Important Dates</div>
+      <div class="pageSub">Deadlines, exams, events.</div>
+      <div class="card">
+        <div class="row" style="margin-bottom:10px;">
+          <input type="text" id="dateLabel" placeholder="What's happening" style="flex:1.5">
+          <input type="date" id="dateValue">
+          <button class="btn" id="addDate">+ add</button>
+        </div>
+        <div id="datesList"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ============ THEME ============ */
+function applyTheme(t){
+  document.body.className = 'theme-' + t;
+  document.getElementById('themeAdventure').classList.toggle('active', t==='adventure');
+  document.getElementById('themeCute').classList.toggle('active', t==='cute');
+}
+document.getElementById('themeAdventure').onclick = () => { state.theme='adventure'; applyTheme('adventure'); save(); };
+document.getElementById('themeCute').onclick = () => { state.theme='cute'; applyTheme('cute'); save(); };
+
+/* ============ NAV ============ */
+document.querySelectorAll('.navbtn').forEach(btn=>{
+  btn.onclick = () => {
+    document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-'+btn.dataset.page).classList.add('active');
+  };
+});
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString(undefined,{weekday:'long', year:'numeric', month:'long', day:'numeric'});
+
+/* ============ STATE ============ */
+let state = {
+  theme:'adventure',
+  skills:{ uiux:[], dsa:[], dev:[], ml:[] }, // each: array of {label, items:[{txt,res,project,done}]}
+  revision:[], assignments:[], customResources:[],
+  attendance:[], projects:[], dates:[]
+};
+const SKILL_LABELS = {uiux:'UI/UX', dsa:'DSA', dev:'Web Dev', ml:'ML'};
+let activeSkill = 'uiux';
+let activeWeek = {uiux:0, dsa:0, dev:0, ml:0};
+
+function migrateSkills(){
+  // if any skill is a flat array of items (old format), wrap into a single week
+  Object.keys(state.skills).forEach(k=>{
+    const arr = state.skills[k];
+    if(arr.length && arr[0] && !('items' in arr[0])){
+      state.skills[k] = [{label:'Week 1', items: arr}];
+    }
+  });
+}
+
+async function load(){
+  try{
+    const res = await window.storage.get('hub-state', false);
+    if(res) state = Object.assign(state, JSON.parse(res.value));
+  }catch(e){ /* first run */ }
+  migrateSkills();
+  applyTheme(state.theme||'adventure');
+  renderAll();
+}
+async function save(){
+  try{ await window.storage.set('hub-state', JSON.stringify(state), false); }
+  catch(e){ console.error('save failed', e); }
+}
+
+/* ============ SKILL SEED DATA (one resource link each, trimmed) ============ */
+const SEED_WEEKS = {
+  uiux: [
+    {label:'Week 1', items:[
+      {txt:'What is UI vs UX?', res:'https://www.interaction-design.org/literature/topics/ui-design', project:'Assignment 1 — pick one app (Zomato/Blinkit/Spotify/Maps), run 10 surveys + 3 interviews → personas, pain points, key insights'},
+      {txt:'Role of a Product Designer', res:'https://www.interaction-design.org/literature/topics/product-design', project:''},
+      {txt:'Design Thinking Process', res:'https://www.interaction-design.org/literature/topics/design-thinking', project:''},
+      {txt:'Human-Centered Design', res:'https://www.interaction-design.org/literature/topics/human-centered-design', project:''},
+      {txt:'Understanding Users', res:'https://www.nngroup.com/articles/know-your-user/', project:''},
+      {txt:'Good vs Bad Design Analysis (teardown)', res:'https://www.nngroup.com/articles/', project:''},
+      {txt:"UX Laws (Jakob's, Hick's, Fitts's)", res:'https://lawsofux.com/', project:''},
+      {txt:'Design Process Overview', res:'https://www.interaction-design.org/literature/topics/design-process', project:''}
+    ]},
+    {label:'Week 2', items:[
+      {txt:'User Research Methods', res:'https://www.nngroup.com/articles/which-ux-research-methods/', project:'Assignment 2 — using Week 1 research, build a full UX Research Report + User Flow, Task Flow, Sitemap'},
+      {txt:'Qualitative vs Quantitative Research', res:'https://www.nngroup.com/articles/qualitative-vs-quantitative-usability-testing/', project:''},
+      {txt:'User Personas', res:'https://www.nngroup.com/articles/persona/', project:''},
+      {txt:'Empathy Mapping', res:'https://www.nngroup.com/articles/empathy-mapping/', project:''},
+      {txt:'User Journey Mapping', res:'https://www.nngroup.com/articles/journey-mapping-101/', project:''},
+      {txt:'Surveys & Interviews', res:'https://www.nngroup.com/articles/interviewing-users/', project:''},
+      {txt:'Defining Problem Statements', res:'https://www.interaction-design.org/literature/topics/problem-statement', project:''},
+      {txt:'Jobs To Be Done (JTBD)', res:'https://jtbd.info/', project:''}
+    ]},
+    {label:'Week 3', items:[
+      {txt:'Information Architecture', res:'https://www.usability.gov/what-and-why/information-architecture.html', project:'Assignment 3 — pick a problem statement from Week 2, design a complete User Flow + 8-10 Low Fidelity Screens in Figma'},
+      {txt:'Content Organization', res:'https://www.nngroup.com/articles/content-structure/', project:''},
+      {txt:'Card Sorting', res:'https://www.nngroup.com/articles/card-sorting-definition/', project:''},
+      {txt:'User Flows', res:'https://www.interaction-design.org/literature/topics/user-flow', project:''},
+      {txt:'Task Flows', res:'https://www.interaction-design.org/literature/topics/task-flow', project:''},
+      {txt:'Sitemap Creation', res:'https://www.interaction-design.org/literature/topics/sitemap', project:''},
+      {txt:'Wireframing', res:'https://www.interaction-design.org/literature/topics/wireframing', project:''},
+      {txt:'Low-Fidelity Design', res:'https://www.interaction-design.org/literature/topics/low-fidelity-prototype', project:''}
+    ]},
+    {label:'Week 4', items:[
+      {txt:'Visual Hierarchy', res:'https://www.interaction-design.org/literature/topics/visual-hierarchy', project:'Practical: redesign a poorly designed screen'},
+      {txt:'Typography', res:'https://www.interaction-design.org/literature/topics/typography', project:''},
+      {txt:'Color Theory', res:'https://www.interaction-design.org/literature/topics/color-theory', project:'Assignment 4 — create a Color Palette, Typography System, and Design System Foundation for your project'},
+      {txt:'Grid Systems', res:'https://www.interaction-design.org/literature/topics/grids', project:''},
+      {txt:'Spacing Systems', res:'https://www.interaction-design.org/literature/topics/spacing', project:''},
+      {txt:'Layout Principles', res:'https://www.interaction-design.org/literature/topics/layout-design', project:''},
+      {txt:'Accessibility Basics', res:'https://www.w3.org/WAI/fundamentals/accessibility-intro/', project:''},
+      {txt:'Design Psychology', res:'https://www.interaction-design.org/literature/topics/psychology', project:''}
+    ]},
+    {label:'Week 5', items:[
+      {txt:'Figma Deep Dive: interface & navigation', res:'https://help.figma.com/hcl/en-us/categories/360002042354-Getting-started', project:'Assignment 5 (major) — favourite app clone: Spotify / Airbnb / Instagram / Duolingo / Blinkit / Swiggy, 6-8 screens, pixel-perfect, Auto Layout, Components'},
+      {txt:'Components', res:'https://help.figma.com/hc/en-us/articles/360038662654-Guide-to-components-in-Figma', project:''},
+      {txt:'Variants', res:'https://help.figma.com/hc/en-us/articles/360056440594-Guide-to-component-properties', project:''},
+      {txt:'Auto Layout', res:'https://help.figma.com/hc/en-us/articles/360040451373-Explore-auto-layout-properties', project:''},
+      {txt:'Variables', res:'https://help.figma.com/hc/en-us/articles/15339657135383-Guide-to-variables-in-Figma', project:''},
+      {txt:'Design Systems in Figma', res:'https://www.figma.com/community', project:''},
+      {txt:'Constraints', res:'https://help.figma.com/hc/en-us/articles/360039957734-Apply-constraints-to-define-how-layers-resize', project:''},
+      {txt:'Useful Plugins', res:'https://www.figma.com/community/plugins', project:''}
+    ]},
+    {label:'Week 6', items:[
+      {txt:'Design Systems', res:'https://www.interaction-design.org/literature/topics/design-systems', project:'Assignment 6 — design a complete Design System: Buttons, Inputs, Cards, Navigation Components'},
+      {txt:'Atomic Design', res:'https://atomicdesign.bradfrost.com/chapter-2/', project:''},
+      {txt:'Component Libraries', res:'https://www.figma.com/community', project:''},
+      {txt:'Responsive Design', res:'https://web.dev/learn/design/', project:''},
+      {txt:'Mobile-first Design', res:'https://web.dev/articles/responsive-web-design-basics', project:''},
+      {txt:'Accessibility in Design Systems', res:'https://www.w3.org/WAI/fundamentals/accessibility-intro/', project:''},
+      {txt:'Design Consistency', res:'https://www.nngroup.com/articles/consistency-and-standards/', project:''}
+    ]},
+    {label:'Week 7', items:[
+      {txt:'Interactive Prototypes', res:'https://help.figma.com/hc/en-us/articles/360040314193-Guide-to-prototyping-in-Figma', project:'Assignment 7 — interactive prototype + user testing report (feedback, findings, improvements)'},
+      {txt:'Microinteractions', res:'https://www.interaction-design.org/literature/topics/microinteractions', project:''},
+      {txt:'User Testing', res:'https://www.nngroup.com/articles/usability-testing-101/', project:''},
+      {txt:'Heuristic Evaluation', res:'https://www.nngroup.com/articles/ten-usability-heuristics/', project:''},
+      {txt:'Accessibility Testing', res:'https://www.w3.org/WAI/test-evaluate/', project:''}
+    ]},
+    {label:'Week 8', items:[
+      {txt:'Portfolio Building', res:'https://www.interaction-design.org/literature/topics/ux-portfolio', project:'Final Capstone — full case study + presentation; pick a real problem brief (e.g. razorpay.com/m/fix-my-itch style)'},
+      {txt:'UX Case Studies', res:'https://www.nngroup.com/articles/ux-case-studies/', project:''},
+      {txt:'Design Presentation', res:'https://www.nngroup.com/articles/presenting-ux-work/', project:''},
+      {txt:'Resume for Product Design', res:'https://www.interaction-design.org/literature/topics/ux-resume', project:''}
+    ]}
+  ],
+  dsa: [
+    {label:'Week 1', items:[
+      {txt:'Things to know in C++/Java/Python before DSA', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Learn the basics: patterns, math, arrays intro', res:'https://www.youtube.com/playlist?list=PLDzeHZWIZsTryvtXdMr6rPh4IDexB5NIA', project:''},
+      {txt:'Time & Space Complexity', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Basic recursion problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Recursion: subsequences & subsets', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Hard recursion problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Set up: pick a LeetCode study plan + solve 5 problems', res:'https://leetcode.com/studyplan/', project:''},
+      {txt:'Set up your Codeforces practice routine', res:'https://codeforces.com/problemset', project:''}
+    ]},
+    {label:'Week 2', items:[
+      {txt:'STL basics (vector, pair, map, set)', res:'https://www.youtube.com/playlist?list=PLDzeHZWIZsTryvtXdMr6rPh4IDexB5NIA', project:''},
+      {txt:'Basic OOP concepts', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'1D Arrays: easy problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'1D Arrays: medium problems (rotate, subarray sum, Kadane)', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Arrays: hard problems (next permutation, 3-sum, merge intervals)', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'2D Arrays / matrix problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Sorting techniques: selection, bubble, insertion', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Sorting: merge sort, quick sort', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''}
+    ]},
+    {label:'Week 3', items:[
+      {txt:'Bit manipulation: basics', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Bit manipulation: medium/hard', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Binary search on 1D arrays', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Binary search on answers', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Binary search on 2D arrays / matrices', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Strings: basic problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Strings: medium problems (palindrome, substrings)', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Strings: hard problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:'Codeforces Div 3/4 contest for speed practice'}
+    ]},
+    {label:'Week 4', items:[
+      {txt:'Backtracking: basics', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Backtracking: medium/hard problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Singly LinkedList: basics, insert/delete', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Singly LinkedList: reverse, medium problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Doubly LinkedList', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Medium LL problems (cycle detection, middle node)', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Hard LL problems (merge K lists, LRU cache)', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Recursion on LinkedList', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''}
+    ]},
+    {label:'Week 5', items:[
+      {txt:'Stacks & Queues: implementation', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Stacks & Queues: basic problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Stacks & Queues: medium/hard problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Sliding window & two pointers: easy/medium', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Sliding window: hard (longest substring, max subarray)', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Monotonic stack problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'JS/array methods refresher for problem-solving', res:'https://www.geeksforgeeks.org/javascript/javascript-array-methods/', project:''}
+    ]},
+    {label:'Week 6', items:[
+      {txt:'Binary Trees: traversals (pre/in/post)', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Binary Trees: level order, views', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Binary Trees: medium problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Binary Trees: hard (LCA, diameter, max path sum)', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Binary Search Trees: basics', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'BST: medium problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'BST: hard problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''}
+    ]},
+    {label:'Week 7', items:[
+      {txt:'Heaps: implementation', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Heaps: problems (k-largest, median in stream)', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Greedy: basics (activity selection)', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Greedy: medium/hard (job sequencing)', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Graphs: BFS/DFS basics', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Graphs: medium problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:'Solve a graph-tagged set on your LeetCode study plan'},
+      {txt:'Graphs: cycle detection, bipartite checks', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''}
+    ]},
+    {label:'Week 8', items:[
+      {txt:'Graphs: topo sort', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Graphs: shortest path (Dijkstra, Bellman-Ford)', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Graphs: Union-Find / disjoint set', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Dynamic Programming: 1D DP basics', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'DP: knapsack pattern', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'DP: 2D / grid problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Tries: basics & problems', res:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z', project:''},
+      {txt:'Mixed practice: full contest + review weak topics', res:'https://codeforces.com/contests', project:'Take part in a live Codeforces round, then log which topics you struggled with'}
+    ]}
+  ],
+  dev: [
+    {label:'Week 1', items:[
+      {txt:'Semantic HTML, forms & validation, accessibility', res:'https://developer.mozilla.org/en-US/docs/Web/HTML', project:'Build a contact form with full native HTML validation, then run it through an accessibility checker'},
+      {txt:'HTML tables & lists (resume layout practice)', res:'https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table', project:'Build a single-page HTML resume with no CSS'}
+    ]},
+    {label:'Week 2', items:[
+      {txt:'CSS box model, flexbox, grid', res:'https://www.youtube.com/@KevinPowell', project:'Rebuild your resume layout with flexbox/grid, make it look like a real one-pager'},
+      {txt:'CSS positioning & z-index', res:'https://developer.mozilla.org/en-US/docs/Web/CSS/position', project:'Build a sticky navbar + image card with hover overlay'}
+    ]},
+    {label:'Week 3', items:[
+      {txt:'Sass/SCSS + responsive design', res:'https://sass-lang.com/guide/', project:'Convert your CSS into SCSS with variables for color/spacing'},
+      {txt:'Media queries & mobile-first design', res:'https://web.dev/learn/design/', project:'Make your resume page fully responsive from 360px to 1440px'}
+    ]},
+    {label:'Week 4', items:[
+      {txt:'JS fundamentals, DOM, ES6+', res:'https://www.youtube.com/watch?v=PkZNo7MFNFg', project:'Build a simple calculator using JS + DOM manipulation'},
+      {txt:'Events & form handling in JS', res:'https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model', project:'Make your contact form submit and show a custom success message via JS'}
+    ]},
+    {label:'Week 5', items:[
+      {txt:'JS array methods + async/await + APIs', res:'https://www.geeksforgeeks.org/javascript/javascript-array-methods/', project:'Build a small to-do list app using only map/filter/reduce'},
+      {txt:'Fetching data from public APIs', res:'https://javascript.info/async', project:'Build a weather app using a public weather API'}
+    ]},
+    {label:'Week 6', items:[
+      {txt:'Git & GitHub, npm, intro React', res:'https://react.dev/learn', project:'Push everything you\'ve built so far into one clean GitHub repo with a README'},
+      {txt:'React components, props, state', res:'https://react.dev/learn/your-first-component', project:'Convert your to-do list into a React component'}
+    ]},
+    {label:'Week 7', items:[
+      {txt:'Build & deploy a portfolio site', res:'https://www.theodinproject.com/', project:'Build a personal portfolio site (HTML/CSS/JS or React) showcasing your weather app + to-do list'},
+      {txt:'Deploying free (Netlify/Vercel/GitHub Pages)', res:'https://vercel.com/docs', project:'Deploy your portfolio and add the live link to your GitHub README'}
+    ]}
+  ],
+  ml: [
+    {label:'Week 1', items:[
+      {txt:'Python basics', res:'https://docs.python.org/3/tutorial/', project:'Write small scripts: a number guessing game, a basic to-do CLI app'}
+    ]},
+    {label:'Week 2', items:[
+      {txt:'NumPy & Pandas', res:'https://pandas.pydata.org/docs/getting_started/index.html', project:'Clean & explore a public Kaggle dataset (handle missing values, outliers)'}
+    ]},
+    {label:'Week 3', items:[
+      {txt:'Visualization & statistics', res:'https://www.khanacademy.org/math/statistics-probability', project:'Make a small EDA notebook with 5+ charts on a dataset of your choice'}
+    ]},
+    {label:'Week 4', items:[
+      {txt:'Core ML: regression, trees, k-NN, SVM', res:'https://scikit-learn.org/stable/tutorial/index.html', project:'Build a simple house-price regression model'}
+    ]},
+    {label:'Week 5', items:[
+      {txt:'scikit-learn projects: classification & clustering', res:'https://scikit-learn.org/stable/modules/model_evaluation.html', project:'Titanic survival predictor + a customer-segmentation clustering project'}
+    ]},
+    {label:'Week 6', items:[
+      {txt:'Neural network basics', res:'https://www.3blue1brown.com/topics/neural-networks', project:'Implement a tiny neural net from scratch in plain Python/NumPy (no frameworks)'}
+    ]},
+    {label:'Week 7', items:[
+      {txt:'TensorFlow/Keras or PyTorch', res:'https://www.tensorflow.org/tutorials/quickstart/beginner', project:'Build a digit classifier on MNIST using your chosen framework'}
+    ]},
+    {label:'Week 8', items:[
+      {txt:'Ship one end-to-end ML project', res:'https://roadmap.sh/machine-learning', project:'Pick one complete idea (sentiment classifier / image classifier / recommender), build, train, write up, push to GitHub'}
+    ]}
+  ]
+};
+
+const CURATED_RESOURCES = {
+  'DSA': [
+    {name:'Striver A2Z Sheet', url:'https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z'},
+    {name:'LeetCode Study Plans', url:'https://leetcode.com/studyplan/'},
+    {name:'Your Codeforces profile', url:'https://codeforces.com/profile/shreyy_rayy'},
+    {name:'CodeHelp C++ DSA Playlist', url:'https://www.youtube.com/playlist?list=PLDzeHZWIZsTryvtXdMr6rPh4IDexB5NIA'}
+  ],
+  'Web Dev': [
+    {name:'MDN Web Docs', url:'https://developer.mozilla.org/'},
+    {name:'GFG — JS Array Methods', url:'https://www.geeksforgeeks.org/javascript/javascript-array-methods/'},
+    {name:'W3Schools', url:'https://www.w3schools.com/'},
+    {name:'The Odin Project', url:'https://www.theodinproject.com/'},
+    {name:'Kevin Powell (CSS)', url:'https://www.youtube.com/@KevinPowell'}
+  ],
+  'ML': [
+    {name:'scikit-learn docs', url:'https://scikit-learn.org/stable/'},
+    {name:'3Blue1Brown — Neural Networks', url:'https://www.3blue1brown.com/topics/neural-networks'},
+    {name:'TensorFlow Quickstart', url:'https://www.tensorflow.org/tutorials/quickstart/beginner'},
+    {name:'roadmap.sh — ML', url:'https://roadmap.sh/machine-learning'}
+  ],
+  'UI/UX': [
+    {name:'Laws of UX', url:'https://lawsofux.com/'},
+    {name:'Interaction Design Foundation', url:'https://www.interaction-design.org/'},
+    {name:'Nielsen Norman Group', url:'https://www.nngroup.com/'},
+    {name:'Figma Help Center', url:'https://help.figma.com/'}
+  ]
+};
+
+const QUOTES = [
+  "Don't stop now — every line of code you write today is one you won't have to relearn later.",
+  "Discipline beats motivation. Show up for 30 minutes even on the days you don't feel like it.",
+  "Progress, not perfection. Tick one box today.",
+  "You don't have to be great to start, but you have to start to be great.",
+  "Consistency compounds — today's small effort is tomorrow's skill.",
+  "Hard days are part of the deal. One box, one win.",
+  "Nobody is coming to do this for you — that's exactly why it'll feel good when you do."
+];
+function dayOfYear(d){ const s=new Date(d.getFullYear(),0,0); return Math.floor((d-s)/86400000); }
+
+/* ============ HELPERS ============ */
+function esc(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escAttr(s){ return s ? String(s).replace(/"/g,'&quot;') : '#'; }
+function fmtDate(d){ if(!d) return ''; const dt=new Date(d); return dt.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}); }
+
+/* ============ RENDER: OVERVIEW ============ */
+function renderOverview(){
+  let totalDone=0, totalAll=0;
+  const grid = document.getElementById('overviewSkillGrid');
+  grid.innerHTML='';
+  Object.keys(state.skills).forEach(k=>{
+    const items = state.skills[k].flatMap(w=>w.items);
+    const done = items.filter(i=>i.done).length;
+    totalDone += done; totalAll += items.length;
+    const pct = items.length ? Math.round(done/items.length*100) : 0;
+    const div = document.createElement('div');
+    div.className='skillcard';
+    div.innerHTML = `<div class="name">${SKILL_LABELS[k]}</div><div class="bar-outer"><div class="bar-inner" style="width:${pct}%"></div></div><div class="pct">${done}/${items.length} done</div>`;
+    grid.appendChild(div);
+  });
+  const overallPct = totalAll ? Math.round(totalDone/totalAll*100) : 0;
+  document.getElementById('overallPct').innerHTML = overallPct + '%<small>overall progress across all skills</small>';
+  const circumference = 2*Math.PI*52;
+  document.getElementById('ringFg').setAttribute('stroke-dasharray', circumference.toFixed(1));
+  document.getElementById('ringFg').setAttribute('stroke-dashoffset', (circumference*(1-overallPct/100)).toFixed(1));
+  document.getElementById('overviewQuote').textContent = '"' + QUOTES[dayOfYear(new Date())%QUOTES.length] + '"';
+}
+
+/* ============ RENDER: SKILLS ============ */
+function renderSkillTabs(){
+  const wrap = document.getElementById('skillTabs');
+  wrap.innerHTML='';
+  Object.keys(SKILL_LABELS).forEach(k=>{
+    const b = document.createElement('div');
+    b.className = 'subtab' + (k===activeSkill?' active':'');
+    b.textContent = SKILL_LABELS[k];
+    b.onclick = () => { activeSkill=k; renderSkillTabs(); renderWeekTabs(); renderSkillItems(); };
+    wrap.appendChild(b);
+  });
+}
+function renderWeekTabs(){
+  const wrap = document.getElementById('weekTabs');
+  wrap.innerHTML='';
+  const weeks = state.skills[activeSkill];
+  if(!weeks.length){ wrap.innerHTML = '<span style="color:var(--dim);font-size:12px;">no weeks yet — load the saved plan, or add a topic below to create Week 1</span>'; return; }
+  weeks.forEach((w,idx)=>{
+    const done = w.items.filter(i=>i.done).length;
+    const b = document.createElement('div');
+    b.className = 'subtab' + (idx===activeWeek[activeSkill] ? ' active' : '');
+    b.textContent = `${w.label} (${done}/${w.items.length})`;
+    b.onclick = () => { activeWeek[activeSkill]=idx; renderWeekTabs(); renderSkillItems(); };
+    wrap.appendChild(b);
+  });
+  const addWeekBtn = document.createElement('div');
+  addWeekBtn.className = 'subtab';
+  addWeekBtn.style.opacity='0.7';
+  addWeekBtn.textContent = '+ new week';
+  addWeekBtn.onclick = () => {
+    state.skills[activeSkill].push({label:'Week '+(state.skills[activeSkill].length+1), items:[]});
+    activeWeek[activeSkill] = state.skills[activeSkill].length-1;
+    save(); renderWeekTabs(); renderSkillItems();
+  };
+  wrap.appendChild(addWeekBtn);
+}
+function renderSkillItems(){
+  const weeks = state.skills[activeSkill];
+  const wrap = document.getElementById('skillItems');
+  wrap.innerHTML='';
+  if(!weeks.length){ wrap.innerHTML = '<div class="empty">add a topic below to start Week 1, or load the saved plan</div>'; return; }
+  const week = weeks[activeWeek[activeSkill]];
+  const items = week.items;
+  if(!items.length){ wrap.innerHTML = `<div class="empty">nothing in ${esc(week.label)} yet — add a topic below</div>`; return; }
+  items.forEach((it,idx)=>{
+    const row = document.createElement('div');
+    row.className = 'item' + (it.done?' done':'');
+    row.innerHTML = `
+      <input type="checkbox" ${it.done?'checked':''} class="skToggle" data-idx="${idx}">
+      <div class="body">
+        <div class="txt">${esc(it.txt)}</div>
+        ${it.res ? `<div class="meta"><a href="${escAttr(it.res)}" target="_blank" rel="noopener">🔗 resource</a></div>` : ''}
+        ${it.project ? `<div class="proj">🛠 ${esc(it.project)}</div>` : ''}
+      </div>
+      <button class="iconbtn skDel" data-idx="${idx}">✕</button>
+    `;
+    wrap.appendChild(row);
+  });
+  wrap.querySelectorAll('.skToggle').forEach(cb=>cb.onchange=()=>{ week.items[cb.dataset.idx].done=cb.checked; save(); renderSkillItems(); renderWeekTabs(); renderOverview(); });
+  wrap.querySelectorAll('.skDel').forEach(b=>b.onclick=()=>{ week.items.splice(b.dataset.idx,1); save(); renderSkillItems(); renderWeekTabs(); renderOverview(); });
+}
+document.getElementById('addSkillItem').onclick = () => {
+  const txt = document.getElementById('skillTxt');
+  const res = document.getElementById('skillRes');
+  const proj = document.getElementById('skillProj');
+  if(!txt.value.trim()) return;
+  if(!state.skills[activeSkill].length){
+    state.skills[activeSkill].push({label:'Week 1', items:[]});
+    activeWeek[activeSkill]=0;
+  }
+  state.skills[activeSkill][activeWeek[activeSkill]].items.push({txt:txt.value.trim(), res:res.value.trim(), project:proj.value.trim(), done:false});
+  txt.value=''; res.value=''; proj.value='';
+  save(); renderWeekTabs(); renderSkillItems(); renderOverview();
+};
+document.getElementById('loadPlanBtn').onclick = () => {
+  const seedWeeks = SEED_WEEKS[activeSkill];
+  seedWeeks.forEach(seedWeek=>{
+    let week = state.skills[activeSkill].find(w=>w.label===seedWeek.label);
+    if(!week){ week = {label:seedWeek.label, items:[]}; state.skills[activeSkill].push(week); }
+    seedWeek.items.forEach(it=>{
+      const exists = week.items.some(x=>x.txt===it.txt);
+      if(!exists) week.items.push({...it, done:false});
+    });
+  });
+  save(); renderWeekTabs(); renderSkillItems(); renderOverview();
+};
+
+/* ============ REVISION ============ */
+function renderRevision(){
+  const tbody = document.querySelector('#revTable tbody');
+  tbody.innerHTML='';
+  if(!state.revision.length){ tbody.innerHTML = '<tr><td colspan="3" class="empty">no revision topics yet</td></tr>'; return; }
+  state.revision.forEach((r,idx)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${esc(r.topic)}</td><td>${r.last ? fmtDate(r.last) : '<span style="color:var(--dim)">never</span>'}</td>
+      <td><button class="btn ghost revMark" data-idx="${idx}" style="font-size:11px;padding:5px 9px;">revised today</button> <button class="iconbtn revDel" data-idx="${idx}">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('.revMark').forEach(b=>b.onclick=()=>{ state.revision[b.dataset.idx].last = new Date().toISOString().slice(0,10); save(); renderRevision(); });
+  tbody.querySelectorAll('.revDel').forEach(b=>b.onclick=()=>{ state.revision.splice(b.dataset.idx,1); save(); renderRevision(); });
+}
+document.getElementById('addRev').onclick = () => {
+  const t = document.getElementById('revTopic');
+  if(!t.value.trim()) return;
+  state.revision.push({topic:t.value.trim(), last:null});
+  t.value=''; save(); renderRevision();
+};
+
+/* ============ ASSIGNMENTS ============ */
+function renderAssignments(){
+  const wrap = document.getElementById('asgList');
+  wrap.innerHTML='';
+  if(!state.assignments.length){ wrap.innerHTML='<div class="empty">no assignments or sem goals added yet</div>'; return; }
+  const sorted = state.assignments.map((a,i)=>({...a,_i:i})).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  sorted.forEach(a=>{
+    const row = document.createElement('div');
+    row.className = 'item' + (a.done?' done':'');
+    row.innerHTML = `<input type="checkbox" ${a.done?'checked':''} class="asgToggle" data-idx="${a._i}">
+      <div class="body"><div class="txt">${esc(a.title)} ${a.subject?`<span style="color:var(--dim);font-size:11px;">— ${esc(a.subject)}</span>`:''}</div>
+      ${a.date?`<div class="meta">due ${fmtDate(a.date)}</div>`:''}</div>
+      <button class="iconbtn asgDel" data-idx="${a._i}">✕</button>`;
+    wrap.appendChild(row);
+  });
+  wrap.querySelectorAll('.asgToggle').forEach(cb=>cb.onchange=()=>{ state.assignments[cb.dataset.idx].done=cb.checked; save(); renderAssignments(); });
+  wrap.querySelectorAll('.asgDel').forEach(b=>b.onclick=()=>{ state.assignments.splice(b.dataset.idx,1); save(); renderAssignments(); });
+}
+document.getElementById('addAsg').onclick = () => {
+  const t=document.getElementById('asgTitle'), s=document.getElementById('asgSubject'), d=document.getElementById('asgDate');
+  if(!t.value.trim()) return;
+  state.assignments.push({title:t.value.trim(), subject:s.value.trim(), date:d.value, done:false});
+  t.value=''; s.value=''; d.value='';
+  save(); renderAssignments();
+};
+
+/* ============ RESOURCES ============ */
+function renderResources(){
+  const wrap = document.getElementById('curatedResources');
+  wrap.innerHTML='';
+  Object.keys(CURATED_RESOURCES).forEach(group=>{
+    const div = document.createElement('div');
+    div.className='resgroup';
+    div.innerHTML = `<h3>${esc(group)}</h3><ul>${CURATED_RESOURCES[group].map(r=>`<li><a href="${escAttr(r.url)}" target="_blank" rel="noopener">${esc(r.name)}</a></li>`).join('')}</ul>`;
+    wrap.appendChild(div);
+  });
+  const custom = document.getElementById('customResList');
+  custom.innerHTML='';
+  if(state.customResources.length){
+    state.customResources.forEach((r,idx)=>{
+      const row = document.createElement('div');
+      row.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line);font-size:13px;';
+      row.innerHTML = `<a href="${escAttr(r.url)}" target="_blank" rel="noopener">${esc(r.name)}</a><button class="iconbtn custDel" data-idx="${idx}">✕</button>`;
+      custom.appendChild(row);
+    });
+    custom.querySelectorAll('.custDel').forEach(b=>b.onclick=()=>{ state.customResources.splice(b.dataset.idx,1); save(); renderResources(); });
+  }
+}
+document.getElementById('addRes').onclick = () => {
+  const n=document.getElementById('resName'), u=document.getElementById('resUrl');
+  if(!n.value.trim()||!u.value.trim()) return;
+  state.customResources.push({name:n.value.trim(), url:u.value.trim()});
+  n.value=''; u.value=''; save(); renderResources();
+};
+
+/* ============ ATTENDANCE ============ */
+function renderAttendance(){
+  const log = state.attendance;
+  const present = log.filter(a=>a.status==='present').length;
+  const pct = log.length ? Math.round(present/log.length*100) : null;
+  document.getElementById('attPct').textContent = pct===null ? '—' : pct+'%';
+  const tbody = document.getElementById('attLog');
+  tbody.innerHTML='';
+  if(!log.length){ tbody.innerHTML='<tr><td colspan="3" class="empty">no entries yet</td></tr>'; return; }
+  log.slice().reverse().forEach((a,ridx)=>{
+    const idx = log.length-1-ridx;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${fmtDate(a.date)}</td><td style="color:${a.status==='present'?'var(--accent2)':'var(--danger)'}">${a.status}</td>
+      <td><button class="iconbtn attDel" data-idx="${idx}">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('.attDel').forEach(b=>b.onclick=()=>{ state.attendance.splice(b.dataset.idx,1); save(); renderAttendance(); });
+}
+function markAttendance(status){
+  const today = new Date().toISOString().slice(0,10);
+  state.attendance = state.attendance.filter(a=>a.date!==today);
+  state.attendance.push({date:today, status});
+  save(); renderAttendance();
+}
+document.getElementById('markPresent').onclick = () => markAttendance('present');
+document.getElementById('markAbsent').onclick = () => markAttendance('absent');
+
+/* ============ PROJECTS ============ */
+function renderProjects(){
+  const wrap = document.getElementById('projCards');
+  wrap.innerHTML='';
+  if(!state.projects.length){ wrap.innerHTML='<div class="empty">no projects added yet — your finished builds will show up here</div>'; return; }
+  state.projects.forEach((p,idx)=>{
+    const card = document.createElement('div');
+    card.className='projcard';
+    card.innerHTML = `<h3>${esc(p.title)}</h3><p>${esc(p.desc)}</p>
+      ${p.tags && p.tags.length ? p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('') : ''}
+      <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;">
+        ${p.link ? `<a href="${escAttr(p.link)}" target="_blank" rel="noopener">view →</a>` : '<span></span>'}
+        <button class="iconbtn projDel" data-idx="${idx}">✕</button>
+      </div>`;
+    wrap.appendChild(card);
+  });
+  wrap.querySelectorAll('.projDel').forEach(b=>b.onclick=()=>{ state.projects.splice(b.dataset.idx,1); save(); renderProjects(); });
+}
+document.getElementById('addProj').onclick = () => {
+  const t=document.getElementById('projTitle'), l=document.getElementById('projLink'), tg=document.getElementById('projTags'), d=document.getElementById('projDesc');
+  if(!t.value.trim()) return;
+  state.projects.push({title:t.value.trim(), link:l.value.trim(), desc:d.value.trim(), tags: tg.value.split(',').map(s=>s.trim()).filter(Boolean)});
+  t.value=''; l.value=''; tg.value=''; d.value='';
+  save(); renderProjects();
+};
+
+/* ============ IMPORTANT DATES ============ */
+function renderDates(){
+  const wrap = document.getElementById('datesList');
+  wrap.innerHTML='';
+  if(!state.dates.length){ wrap.innerHTML='<div class="empty">no dates added yet</div>'; return; }
+  const sorted = state.dates.map((d,i)=>({...d,_i:i})).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  const todayStr = new Date().toISOString().slice(0,10);
+  sorted.forEach(d=>{
+    const row = document.createElement('div');
+    row.className='dateitem';
+    const upcoming = d.date >= todayStr;
+    row.innerHTML = `<span>${esc(d.label)}</span><span style="display:flex;gap:8px;align-items:center;">
+      <span class="datepill" style="${upcoming?'':'opacity:0.5;'}">${fmtDate(d.date)}</span>
+      <button class="iconbtn dateDel" data-idx="${d._i}">✕</button></span>`;
+    wrap.appendChild(row);
+  });
+  wrap.querySelectorAll('.dateDel').forEach(b=>b.onclick=()=>{ state.dates.splice(b.dataset.idx,1); save(); renderDates(); });
+}
+document.getElementById('addDate').onclick = () => {
+  const l=document.getElementById('dateLabel'), v=document.getElementById('dateValue');
+  if(!l.value.trim()||!v.value) return;
+  state.dates.push({label:l.value.trim(), date:v.value});
+  l.value=''; v.value='';
+  save(); renderDates();
+};
+
+/* ============ INIT ============ */
+function renderAll(){
+  renderOverview(); renderSkillTabs(); renderWeekTabs(); renderSkillItems(); renderRevision();
+  renderAssignments(); renderResources(); renderAttendance(); renderProjects(); renderDates();
+}
+load();
+</script>
+</body>
+</html>
